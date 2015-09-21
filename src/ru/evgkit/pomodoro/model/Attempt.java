@@ -7,7 +7,7 @@ public class Attempt {
 
     private AttemptKind mKind;
 
-    public Attempt(String message, AttemptKind kind) {
+    public Attempt(AttemptKind kind, String message) {
         mMessage = message;
         mKind = kind;
         mRemainingSeconds = mKind.getTotalSeconds();
