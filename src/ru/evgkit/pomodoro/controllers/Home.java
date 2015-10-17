@@ -1,11 +1,14 @@
 package ru.evgkit.pomodoro.controllers;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
+import javafx.util.Duration;
 import ru.evgkit.pomodoro.model.Attempt;
 import ru.evgkit.pomodoro.model.AttemptKind;
 
@@ -20,9 +23,30 @@ public class Home {
 
     private StringProperty mTimerText;
 
+    private Timeline mTimeline;
+
+    public StringProperty timerTextProperty() {
+        return mTimerText;
+    }
+
+    public String getTimerText() {
+        return mTimerText.get();
+    }
+
+    public void setTimerText(String timerText) {
+        mTimerText.set(timerText);
+    }
+
+    public void setTimerText(int remainingSeconds) {
+        int minutes = remainingSeconds / 60;
+        int seconds = remainingSeconds % 60;
+
+        setTimerText(String.format("%02d:%02d", minutes, seconds));
+    }
+
     public Home() {
         mTimerText = new SimpleStringProperty();
-        setTimerText(455);
+        setTimerText(0);
     }
 
     private void prepareAttempt(AttemptKind kind) {
@@ -33,6 +57,22 @@ public class Home {
         title.setText(kind.getDisplayName());
 
         setTimerText(mCurrentAttempt.getRemainingSeconds());
+
+        // FIXME: multiple timelines
+        mTimeline = new Timeline();
+        mTimeline.setCycleCount(kind.getTotalSeconds());
+        mTimeline.getKeyFrames().add(new KeyFrame(Duration.seconds(1), e -> {
+            mCurrentAttempt.tick();
+            setTimerText(mCurrentAttempt.getRemainingSeconds());
+        }));
+    }
+
+    public void playTimer() {
+        mTimeline.play();
+    }
+
+    public void pauseTimer() {
+        mTimeline.pause();
     }
 
     private void addAttemptStyle(AttemptKind kind) {
@@ -49,22 +89,8 @@ public class Home {
         System.out.println("HI MOM");
     }
 
-    public String getTimerText() {
-        return mTimerText.get();
-    }
-
-    public StringProperty timerTextProperty() {
-        return mTimerText;
-    }
-
-    public void setTimerText(String timerText) {
-        mTimerText.set(timerText);
-    }
-
-    public void setTimerText(int remainingSeconds) {
-        int minutes = remainingSeconds / 60;
-        int seconds = remainingSeconds % 60;
-
-        setTimerText(String.format("%02d:%02d", minutes, seconds));
+    public void handleRestart(ActionEvent actionEvent) {
+        prepareAttempt(AttemptKind.FOCUS);
+        playTimer();
     }
 }
