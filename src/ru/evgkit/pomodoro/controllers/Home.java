@@ -1,5 +1,7 @@
 package ru.evgkit.pomodoro.controllers;
 
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
@@ -16,12 +18,21 @@ public class Home {
 
     private Attempt mCurrentAttempt;
 
+    private StringProperty mTimerText;
+
+    public Home() {
+        mTimerText = new SimpleStringProperty();
+        setTimerText(455);
+    }
+
     private void prepareAttempt(AttemptKind kind) {
         clearAttemptStyles();
         mCurrentAttempt = new Attempt(kind, "");
         addAttemptStyle(kind);
 
         title.setText(kind.getDisplayName());
+
+        setTimerText(mCurrentAttempt.getRemainingSeconds());
     }
 
     private void addAttemptStyle(AttemptKind kind) {
@@ -36,5 +47,24 @@ public class Home {
 
     public void DEBUG(ActionEvent actionEvent) {
         System.out.println("HI MOM");
+    }
+
+    public String getTimerText() {
+        return mTimerText.get();
+    }
+
+    public StringProperty timerTextProperty() {
+        return mTimerText;
+    }
+
+    public void setTimerText(String timerText) {
+        mTimerText.set(timerText);
+    }
+
+    public void setTimerText(int remainingSeconds) {
+        int minutes = remainingSeconds / 60;
+        int seconds = remainingSeconds % 60;
+
+        setTimerText(String.format("%02d:%02d", minutes, seconds));
     }
 }
